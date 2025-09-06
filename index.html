@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiókrendszer Példa</title>
+<style>
+  body { font-family: Arial; margin: 20px; }
+  input { display: block; margin: 10px 0; padding: 8px; width: 250px; }
+  button { padding: 8px 16px; margin-right: 10px; }
+  #profile { display: none; margin-top: 20px; border: 1px solid #ccc; padding: 10px; width: 270px; }
+</style>
+</head>
+<body>
+
+<h1>Fiókrendszer Példa</h1>
+
+<div id="auth">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Jelszó">
+  <button onclick="register()">Regisztráció</button>
+  <button onclick="login()">Bejelentkezés</button>
+</div>
+
+<div id="profile">
+  <h2>Profil</h2>
+  <p id="user-info"></p>
+  <button onclick="logout()">Kijelentkezés</button>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+  // 1️⃣ Firebase konfiguráció
+  const firebaseConfig = {
+    apiKey: "API_KEYED",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // 2️⃣ Regisztráció
+  function register() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => alert("Sikeres regisztráció!"))
+      .catch(error => alert(error.message));
+  }
+
+  // 3️⃣ Bejelentkezés
+  function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        alert("Sikeres bejelentkezés!");
+        showProfile(userCredential.user);
+      })
+      .catch(error => alert(error.message));
+  }
+
+  // 4️⃣ Kijelentkezés
+  function logout() {
+    auth.signOut().then(() => {
+      alert("Kijelentkezve!");
+      document.getElementById("profile").style.display = "none";
+      document.getElementById("auth").style.display = "block";
+    });
+  }
+
+  // 5️⃣ Profil megjelenítése
+  function showProfile(user) {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("profile").style.display = "block";
+    document.getElementById("user-info").innerText = "Email: " + user.email + "\nUID: " + user.uid;
+  }
+
+  // 6️⃣ Ellenőrzés, ha már be van jelentkezve
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      showProfile(user);
+    }
+  });
+</script>
+
+</body>
+</html>
